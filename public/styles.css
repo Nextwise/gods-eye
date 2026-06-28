@@ -302,6 +302,66 @@ body {
 .fc-muted { color: var(--muted-2); border: 1px solid var(--border-2); }
 .ntags { font-size: 0.7rem; color: var(--muted-2); text-align: right; }
 
+/* ---- money on the table — the JOIN (Slice 4) ---- */
+.join { max-width: 1100px; margin: 0 auto; padding: 1rem 1.5rem 0; }
+.join-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+.join-title { font-size: 0.9rem; font-weight: 600; }
+.join-meta { font-size: 0.75rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.jcards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.6rem;
+}
+.jcard {
+  background: linear-gradient(180deg, #141b27, var(--panel));
+  border: 1px solid var(--border-2);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.jcard-head { display: flex; align-items: center; gap: 0.5rem; }
+.jpo {
+  font-size: 0.66rem;
+  font-weight: 700;
+  color: var(--accent);
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 5px;
+  padding: 0.05rem 0.35rem;
+}
+.jname { font-size: 0.82rem; font-weight: 600; }
+.junspent {
+  font-size: 1.7rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ok);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.junspent span {
+  display: block;
+  font-size: 0.62rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-2);
+  margin-top: 0.2rem;
+}
+.jstats { display: flex; flex-direction: column; gap: 0.2rem; }
+.jstats > div { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.72rem; }
+.jlbl { color: var(--muted-2); }
+.jval { color: var(--muted); font-variant-numeric: tabular-nums; }
+.jcalls { font-size: 0.74rem; color: var(--accent); }
+.jblurb { font-size: 0.7rem; color: var(--muted-2); line-height: 1.35; }
+
 @media (max-width: 560px) {
   .card { flex-direction: column; }
   .card-deadline { align-items: flex-start; text-align: left; flex-direction: row; gap: 0.4rem; }

@@ -28,5 +28,9 @@
 [functions."cron-news"]
   schedule = "0 */6 * * *"
 
+# Absorption × calls JOIN, weekly (Mon 05:00 UTC) — cohesion data moves slowly.
+[functions."cron-join"]
+  schedule = "0 5 * * 1"
+
 # Routing for /api/* is declared in-code (config.path in each .mts),
 # using Functions 2.0 native routing — no redirect rules needed.

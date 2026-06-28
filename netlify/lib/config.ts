@@ -99,7 +99,23 @@ export const BLOBS = {
     calls: "calls.json",
     macro: "macro.json",
     news: "news.json",
+    join: "join.json",
   },
+} as const;
+
+// --- Slice 4: absorption (Cohesion Open Data) + the JOIN ---
+export const COHESION = {
+  base: "https://cohesiondata.ec.europa.eu/resource",
+  // 2014-2020 implementation: planned (total_eligible_cost) vs spent
+  // (total_eligible_expenditure) by Thematic Objective. Filter latest_period='Y'.
+  ds2014: "99js-gm52",
+  // 2021-2027 financial data by Policy Objective: total_amount (planned),
+  // total_eligiblecost_of_selectedoperations (decided),
+  // totalspendeligibleexpenditure_declared (spent). Filter dimension_type=
+  // 'Intervention Field' AND is_latest_tod_cycle='Y' to avoid multi-counting.
+  ds2127: "3git-md5z",
+  country: "RO",
+  timeoutMs: 25000,
 } as const;
 
 // --- Slice 2: macro ---

@@ -264,9 +264,63 @@ async function loadNews() {
   }
 }
 
+/* ---------- money on the table — the JOIN (Slice 4) ---------- */
+
+function eurB(n) {
+  return "€" + (Number(n || 0) / 1e9).toFixed(1) + "B";
+}
+function pctOrDash(n) {
+  return n == null ? "—" : Math.round(n) + "%";
+}
+
+function joinCard(r) {
+  const dl = r.soonestDeadline ? new Date(r.soonestDeadline) : null;
+  const dlText = dl ? dl.toLocaleDateString(undefined, { month: "short", day: "numeric" }) : "";
+  return `
+  <div class="jcard">
+    <div class="jcard-head">
+      <span class="jpo">${esc(r.po)}</span>
+      <span class="jname">${esc(r.name)}</span>
+    </div>
+    <div class="junspent">${eurB(r.unspent21)}<span>on the table</span></div>
+    <div class="jstats">
+      <div><span class="jlbl">spent 21–27</span><span class="jval">RO ${pctOrDash(r.spentPct21)} · EU ${pctOrDash(r.euSpentPct21)}</span></div>
+      <div><span class="jlbl">absorb 14–20</span><span class="jval">RO ${pctOrDash(r.absorb14)} · EU ${pctOrDash(r.euAbsorb14)}</span></div>
+    </div>
+    <div class="jcalls">${r.openCalls} open · ${r.forthcomingCalls} forthcoming${dlText ? " · next " + dlText : ""}</div>
+    <div class="jblurb">${esc(r.blurb)}</div>
+  </div>`;
+}
+
+function renderJoin(doc) {
+  const el = document.getElementById("join");
+  if (!el) return;
+  const rows = doc.rows || [];
+  if (!rows.length) {
+    el.innerHTML = "";
+    return;
+  }
+  el.innerHTML = `
+    <div class="join-head">
+      <span class="join-title">Money on the table · ${esc(doc.country || "RO")}</span>
+      <span class="join-meta">${eurB(doc.ro2127Unspent)} unspent of ${eurB(doc.ro2127TotalPlanned)} · 2021–2027 · ${pctOrDash(doc.ro2127SpentPct)} spent</span>
+    </div>
+    <div class="jcards">${rows.map(joinCard).join("")}</div>`;
+}
+
+async function loadJoin() {
+  try {
+    const res = await fetch("/api/join", { headers: { accept: "application/json" } });
+    renderJoin(await res.json());
+  } catch (e) {
+    /* JOIN is non-critical — leave empty on failure */
+  }
+}
+
 for (const el of [els.search, els.programme, els.status, els.deadline]) {
   el.addEventListener("input", applyFilters);
 }
 load();
 loadMacro();
 loadNews();
+loadJoin();

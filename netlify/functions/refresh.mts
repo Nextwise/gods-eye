@@ -8,6 +8,7 @@
 import type { Config } from "@netlify/functions";
 import { refreshCalls } from "../lib/pipeline";
 import { refreshMacro } from "../lib/macro";
+import { refreshJoin } from "../lib/join-pipeline";
 
 export default async (req: Request) => {
   if (req.method !== "POST") {
@@ -34,9 +35,10 @@ export default async (req: Request) => {
   const wantCalls = source === "all" || source === "calls";
   const wantMacro = source === "all" || source === "macro";
   const wantNews = source === "all" || source === "news";
-  if (!wantCalls && !wantMacro && !wantNews) {
+  const wantJoin = source === "all" || source === "join";
+  if (!wantCalls && !wantMacro && !wantNews && !wantJoin) {
     return Response.json(
-      { ok: false, error: `unknown source "${source}" (use calls|macro|news|all)` },
+      { ok: false, error: `unknown source "${source}" (use calls|macro|news|join|all)` },
       { status: 400 },
     );
   }
@@ -59,6 +61,7 @@ export default async (req: Request) => {
   await Promise.all([
     wantCalls ? refreshCalls().then((r) => void (results.calls = r)) : null,
     wantMacro ? refreshMacro().then((r) => void (results.macro = r)) : null,
+    wantJoin ? refreshJoin().then((r) => void (results.join = r)) : null,
   ]);
   if (wantNews) results.news = { queued: true };
 

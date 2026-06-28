@@ -6,6 +6,7 @@ import { BLOBS } from "./config";
 import type { CallsDoc } from "./sedia";
 import type { MacroDoc } from "./macro";
 import type { NewsDoc } from "./news-pipeline";
+import type { JoinDoc } from "./join-pipeline";
 
 function store() {
   return getStore(BLOBS.store);
@@ -33,4 +34,12 @@ export async function writeNews(doc: NewsDoc): Promise<void> {
 
 export async function readNews(): Promise<NewsDoc | null> {
   return (await store().get(BLOBS.keys.news, { type: "json" })) as NewsDoc | null;
+}
+
+export async function writeJoin(doc: JoinDoc): Promise<void> {
+  await store().setJSON(BLOBS.keys.join, doc);
+}
+
+export async function readJoin(): Promise<JoinDoc | null> {
+  return (await store().get(BLOBS.keys.join, { type: "json" })) as JoinDoc | null;
 }
