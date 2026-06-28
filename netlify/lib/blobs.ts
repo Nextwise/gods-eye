@@ -5,6 +5,7 @@ import { getStore } from "@netlify/blobs";
 import { BLOBS } from "./config";
 import type { CallsDoc } from "./sedia";
 import type { MacroDoc } from "./macro";
+import type { NewsDoc } from "./news-pipeline";
 
 function store() {
   return getStore(BLOBS.store);
@@ -24,4 +25,12 @@ export async function writeMacro(doc: MacroDoc): Promise<void> {
 
 export async function readMacro(): Promise<MacroDoc | null> {
   return (await store().get(BLOBS.keys.macro, { type: "json" })) as MacroDoc | null;
+}
+
+export async function writeNews(doc: NewsDoc): Promise<void> {
+  await store().setJSON(BLOBS.keys.news, doc);
+}
+
+export async function readNews(): Promise<NewsDoc | null> {
+  return (await store().get(BLOBS.keys.news, { type: "json" })) as NewsDoc | null;
 }

@@ -23,5 +23,10 @@
 [functions."cron-macro"]
   schedule = "0 12 * * *"
 
+# Newswire every 6 hours (00:00, 06:00, 12:00, 18:00 UTC). The diff ensures only
+# new items hit the LLMs, so frequent runs stay cheap.
+[functions."cron-news"]
+  schedule = "0 */6 * * *"
+
 # Routing for /api/* is declared in-code (config.path in each .mts),
 # using Functions 2.0 native routing — no redirect rules needed.

@@ -199,8 +199,74 @@ async function loadMacro() {
   }
 }
 
+/* ---------- newswire panel (Slice 3) ---------- */
+
+function scoreClass(n) {
+  return n >= 70 ? "hot" : n >= 45 ? "warm" : "low";
+}
+
+function factChip(fc) {
+  if (!fc || fc.verdict === "skipped") return "";
+  const map = {
+    corroborated: ["ok", "✓ corroborated"],
+    disputed: ["err", "! disputed"],
+    unverified: ["muted", "? unverified"],
+  };
+  const [cls, label] = map[fc.verdict] || ["muted", "? unverified"];
+  const title = fc.note ? ` title="${esc(fc.note)}"` : "";
+  return `<span class="fc fc-${cls}"${title}>${label}</span>`;
+}
+
+function newsCard(it) {
+  const sc = scoreClass(it.score);
+  const meta = [it.sector, it.region, it.programme]
+    .filter((x) => x && x !== "n/a")
+    .map(esc)
+    .join(" · ");
+  return `
+  <a class="ncard u-${sc}" href="${esc(it.link)}" target="_blank" rel="noopener noreferrer">
+    <div class="ncard-top">
+      <span class="nsource">${esc(it.source)}</span>
+      <span class="nscore s-${sc}">${it.score}</span>
+    </div>
+    <h4>${esc(it.title)}</h4>
+    ${it.why ? `<p class="nwhy">${esc(it.why)}</p>` : ""}
+    <div class="ncard-bot">
+      ${factChip(it.factCheck)}
+      ${meta ? `<span class="ntags">${meta}</span>` : ""}
+    </div>
+  </a>`;
+}
+
+function renderNews(doc) {
+  const el = document.getElementById("news");
+  if (!el) return;
+  const items = (doc.items || []).slice(0, 6);
+  if (!items.length) {
+    el.innerHTML = "";
+    return;
+  }
+  const when = doc.fetchedAt ? new Date(doc.fetchedAt).toLocaleString() : "";
+  el.innerHTML = `
+    <div class="news-head">
+      <span class="news-title">Newswire · top signals</span>
+      <span class="news-meta">${doc.count} tracked${when ? " · " + esc(when) : ""}</span>
+    </div>
+    <div class="ncards">${items.map(newsCard).join("")}</div>`;
+}
+
+async function loadNews() {
+  try {
+    const res = await fetch("/api/news", { headers: { accept: "application/json" } });
+    renderNews(await res.json());
+  } catch (e) {
+    /* newswire is non-critical — leave empty on failure */
+  }
+}
+
 for (const el of [els.search, els.programme, els.status, els.deadline]) {
   el.addEventListener("input", applyFilters);
 }
 load();
 loadMacro();
+loadNews();

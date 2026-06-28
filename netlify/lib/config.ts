@@ -98,6 +98,7 @@ export const BLOBS = {
   keys: {
     calls: "calls.json",
     macro: "macro.json",
+    news: "news.json",
   },
 } as const;
 
@@ -129,3 +130,68 @@ export const GEO_LABELS: Record<string, string> = {
   EU27_2020: "European Union",
   EA20: "Euro area",
 };
+
+// --- Slice 3: news + fact-check + scoring ---
+
+// Authority RSS feeds (all verified reachable). Add more here — zero URLs in code.
+export const NEWS = {
+  feeds: [
+    {
+      id: "ec-press",
+      name: "EC Press Corner",
+      url: "https://ec.europa.eu/commission/presscorner/api/rss?language=en",
+      lang: "en",
+    },
+    {
+      id: "ep-press",
+      name: "European Parliament",
+      url: "https://www.europarl.europa.eu/rss/doc/press-releases/en.xml",
+      lang: "en",
+    },
+    {
+      id: "gn-eu",
+      name: "Google News · EU funding",
+      url: "https://news.google.com/rss/search?q=%22Horizon+Europe%22+OR+%22Recovery+and+Resilience%22+OR+%22EU+funding%22+OR+%22cohesion+policy%22&hl=en-US&gl=US&ceid=US:en",
+      lang: "en",
+    },
+    {
+      id: "gn-ro",
+      name: "Google News · RO fonduri",
+      url: "https://news.google.com/rss/search?q=fonduri+europene+OR+PNRR+OR+%22apel+de+proiecte%22+OR+%22finantare+nerambursabila%22&hl=ro&gl=RO&ceid=RO:ro",
+      lang: "ro",
+    },
+  ],
+  maxItemsPerFeed: 40,
+  // Cap LLM spend per run — newest unprocessed items first; the rest roll to the
+  // next run. 20 × 4 runs/day ≈ 80 scored/day, ample for this feed set.
+  maxNewPerRun: 20,
+  // Only items scoring >= this get the (slightly pricier) Grok fact-check.
+  scoreThresholdForGrok: 45,
+  // Drop scored items older than this from the stored doc.
+  keepDays: 14,
+  fetchConcurrency: 6,
+  scoreConcurrency: 6,
+  factCheckConcurrency: 4,
+  timeoutMs: 15000,
+} as const;
+
+// Scoring angles surfaced on the dashboard and asked of the model.
+export const NEWS_ANGLES = ["funding", "macro", "sector", "eligibility", "urgency"] as const;
+
+export const ANTHROPIC = {
+  endpoint: "https://api.anthropic.com/v1/messages",
+  version: "2023-06-01",
+  model: "claude-haiku-4-5", // cheap, high-volume scoring
+  maxTokens: 1024,
+  timeoutMs: 20000,
+} as const;
+
+export const GROK = {
+  // Agent Tools / Responses API (the old chat-completions `search_parameters`
+  // live search was deprecated → HTTP 410). model id grok-4-1-fast confirmed valid.
+  endpoint: "https://api.x.ai/v1/responses",
+  model: "grok-4-1-fast",
+  maxOutputTokens: 700,
+  liveSearch: true,
+  timeoutMs: 25000,
+} as const;

@@ -33,11 +33,26 @@ export default async (req: Request) => {
   const source = (new URL(req.url).searchParams.get("source") ?? "all").toLowerCase();
   const wantCalls = source === "all" || source === "calls";
   const wantMacro = source === "all" || source === "macro";
-  if (!wantCalls && !wantMacro) {
+  const wantNews = source === "all" || source === "news";
+  if (!wantCalls && !wantMacro && !wantNews) {
     return Response.json(
-      { ok: false, error: `unknown source "${source}" (use calls|macro|all)` },
+      { ok: false, error: `unknown source "${source}" (use calls|macro|news|all)` },
       { status: 400 },
     );
+  }
+
+  // News is a long job (live Grok web searches) → kick off the background
+  // function instead of running inline, so this request doesn't time out.
+  if (wantNews) {
+    const base = process.env.URL ?? new URL(req.url).origin;
+    try {
+      await fetch(`${base}/.netlify/functions/news-refresh-background`, {
+        method: "POST",
+        headers: { "x-refresh-token": expected },
+      });
+    } catch {
+      /* trigger is best-effort */
+    }
   }
 
   const results: Record<string, unknown> = {};
@@ -45,8 +60,9 @@ export default async (req: Request) => {
     wantCalls ? refreshCalls().then((r) => void (results.calls = r)) : null,
     wantMacro ? refreshMacro().then((r) => void (results.macro = r)) : null,
   ]);
+  if (wantNews) results.news = { queued: true };
 
-  const ok = Object.values(results).every((r) => (r as { ok: boolean }).ok);
+  const ok = Object.values(results).every((r) => (r as { ok?: boolean }).ok !== false);
   return Response.json({ ok, ...results }, { status: ok ? 200 : 502 });
 };
 
