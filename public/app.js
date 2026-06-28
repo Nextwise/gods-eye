@@ -124,8 +124,86 @@ async function load() {
     setFreshness(doc);
     populateProgrammes();
     applyFilters();
+    renderCalendar();
   } catch (e) {
     els.list.innerHTML = `<div class="empty">Failed to load: ${esc(e && e.message ? e.message : e)}</div>`;
+  }
+}
+
+/* ---------- deadline radar + "what's new" (Slice 5) ---------- */
+
+function renderCalendar() {
+  const el = document.getElementById("calendar");
+  if (!el) return;
+  const now = Date.now();
+  const future = state.all.filter((c) => {
+    if (c.status !== "open" && c.status !== "forthcoming") return false;
+    const t = c.deadline ? Date.parse(c.deadline) : NaN;
+    return !Number.isNaN(t) && t >= now;
+  });
+  if (!future.length) {
+    el.innerHTML = "";
+    return;
+  }
+  const in30 = future.filter((c) => Date.parse(c.deadline) - now <= 30 * 86400000).length;
+
+  const base = new Date();
+  const months = [];
+  const idx = {};
+  for (let i = 0; i < 6; i++) {
+    const d = new Date(Date.UTC(base.getUTCFullYear(), base.getUTCMonth() + i, 1));
+    const key = `${d.getUTCFullYear()}-${d.getUTCMonth()}`;
+    idx[key] = i;
+    months.push({ label: d.toLocaleDateString(undefined, { month: "short" }), count: 0 });
+  }
+  for (const c of future) {
+    const d = new Date(c.deadline);
+    const key = `${d.getUTCFullYear()}-${d.getUTCMonth()}`;
+    if (key in idx) months[idx[key]].count++;
+  }
+  const max = Math.max(1, ...months.map((m) => m.count));
+  const bars = months
+    .map(
+      (m) => `
+    <div class="cal-col">
+      <div class="cal-bar" style="height:${Math.round(6 + 44 * (m.count / max))}px"></div>
+      <div class="cal-cnt">${m.count}</div>
+      <div class="cal-lbl">${esc(m.label)}</div>
+    </div>`,
+    )
+    .join("");
+  el.innerHTML = `
+    <div class="cal-head">
+      <span class="cal-title">Deadline radar</span>
+      <span class="cal-meta">${in30} due in 30 days · ${future.length} upcoming</span>
+    </div>
+    <div class="cal-bars">${bars}</div>`;
+}
+
+function renderWhatsNew(doc) {
+  const el = document.getElementById("whatsnew");
+  if (!el) return;
+  const nc = doc.newCallsCount || 0;
+  const nn = doc.newNewsCount || 0;
+  if (!doc.since || (nc === 0 && nn === 0)) {
+    el.hidden = true;
+    return;
+  }
+  const since = new Date(doc.since).toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  const parts = [];
+  if (nc) parts.push(`<strong>${nc}</strong> new call${nc > 1 ? "s" : ""}`);
+  if (nn) parts.push(`<strong>${nn}</strong> new signal${nn > 1 ? "s" : ""}`);
+  if (doc.closedCount) parts.push(`${doc.closedCount} closed`);
+  el.innerHTML = `<span class="wn-dot"></span><span class="wn-text">${parts.join(" · ")} since ${esc(since)}</span>`;
+  el.hidden = false;
+}
+
+async function loadWhatsNew() {
+  try {
+    const res = await fetch("/api/whatsnew", { headers: { accept: "application/json" } });
+    renderWhatsNew(await res.json());
+  } catch (e) {
+    /* non-critical */
   }
 }
 
@@ -324,3 +402,4 @@ load();
 loadMacro();
 loadNews();
 loadJoin();
+loadWhatsNew();

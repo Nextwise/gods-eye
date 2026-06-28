@@ -100,7 +100,14 @@ export const BLOBS = {
     macro: "macro.json",
     news: "news.json",
     join: "join.json",
+    whatsnew: "whatsnew.json",
   },
+} as const;
+
+// --- Slice 5: "what's new" diff ---
+export const WHATSNEW = {
+  newsScoreThreshold: 55, // only count high-relevance news as a "new signal"
+  maxList: 25, // cap the surfaced lists
 } as const;
 
 // --- Slice 4: absorption (Cohesion Open Data) + the JOIN ---

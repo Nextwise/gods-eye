@@ -9,6 +9,7 @@ import type { Config } from "@netlify/functions";
 import { refreshCalls } from "../lib/pipeline";
 import { refreshMacro } from "../lib/macro";
 import { refreshJoin } from "../lib/join-pipeline";
+import { refreshWhatsNew } from "../lib/whatsnew";
 
 export default async (req: Request) => {
   if (req.method !== "POST") {
@@ -36,9 +37,13 @@ export default async (req: Request) => {
   const wantMacro = source === "all" || source === "macro";
   const wantNews = source === "all" || source === "news";
   const wantJoin = source === "all" || source === "join";
-  if (!wantCalls && !wantMacro && !wantNews && !wantJoin) {
+  const wantWhatsNew = source === "all" || source === "whatsnew";
+  if (!wantCalls && !wantMacro && !wantNews && !wantJoin && !wantWhatsNew) {
     return Response.json(
-      { ok: false, error: `unknown source "${source}" (use calls|macro|news|join|all)` },
+      {
+        ok: false,
+        error: `unknown source "${source}" (use calls|macro|news|join|whatsnew|all)`,
+      },
       { status: 400 },
     );
   }
@@ -64,6 +69,9 @@ export default async (req: Request) => {
     wantJoin ? refreshJoin().then((r) => void (results.join = r)) : null,
   ]);
   if (wantNews) results.news = { queued: true };
+
+  // "What's new" diffs the freshly-written calls, so it runs after the block above.
+  if (wantWhatsNew) results.whatsnew = await refreshWhatsNew();
 
   const ok = Object.values(results).every((r) => (r as { ok?: boolean }).ok !== false);
   return Response.json({ ok, ...results }, { status: ok ? 200 : 502 });

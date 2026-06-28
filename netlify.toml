@@ -32,5 +32,9 @@
 [functions."cron-join"]
   schedule = "0 5 * * 1"
 
+# "What's new" diff, daily at 07:00 UTC — after the SEDIA (06:00) refresh.
+[functions."cron-diff"]
+  schedule = "0 7 * * *"
+
 # Routing for /api/* is declared in-code (config.path in each .mts),
 # using Functions 2.0 native routing — no redirect rules needed.
