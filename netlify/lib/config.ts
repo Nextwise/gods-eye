@@ -97,5 +97,35 @@ export const BLOBS = {
   store: "gods-eye",
   keys: {
     calls: "calls.json",
+    macro: "macro.json",
   },
 } as const;
+
+// --- Slice 2: macro ---
+
+export const BNR = {
+  // The per-year XML carries full YTD history, so one fetch gives both the
+  // latest reference rate and the trend. Year is appended in code.
+  yearUrlBase: "https://www.bnr.ro/files/xml/years/nbrfxrates",
+  // Rates are RON per 1 unit of the currency (per `multiplier` units when set).
+  currencies: ["EUR", "USD", "GBP", "CHF"],
+  sparkDays: 30,
+  timeoutMs: 15000,
+} as const;
+
+export const EUROSTAT = {
+  base: "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data",
+  hicp: {
+    dataset: "prc_hicp_manr", // HICP — annual rate of change
+    coicop: "CP00", // all-items
+    geos: ["RO", "EU27_2020"], // Romania vs EU average
+    months: 13, // trailing window for the trend
+  },
+  timeoutMs: 20000,
+} as const;
+
+export const GEO_LABELS: Record<string, string> = {
+  RO: "Romania",
+  EU27_2020: "European Union",
+  EA20: "Euro area",
+};

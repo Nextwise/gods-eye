@@ -129,7 +129,78 @@ async function load() {
   }
 }
 
+/* ---------- macro panel (Slice 2) ---------- */
+
+function sparkline(values) {
+  if (!values || values.length < 2) return "";
+  const w = 130, h = 30, pad = 2;
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+  const pts = values
+    .map((v, i) => {
+      const x = pad + (i / (values.length - 1)) * (w - 2 * pad);
+      const y = pad + (1 - (v - min) / range) * (h - 2 * pad);
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    })
+    .join(" ");
+  const dir = values[values.length - 1] >= values[0] ? "up" : "down";
+  return `<svg class="spark ${dir}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}"/></svg>`;
+}
+
+function fxTile(r) {
+  const chg = r.changePct;
+  const cls = chg == null ? "" : chg > 0 ? "pos" : chg < 0 ? "neg" : "";
+  const arrow = chg == null ? "" : chg > 0 ? "▲" : chg < 0 ? "▼" : "";
+  const chgTxt = chg == null ? "" : `${arrow} ${Math.abs(chg).toFixed(2)}%`;
+  const mult = r.multiplier && r.multiplier !== 1 ? `${r.multiplier} ` : "";
+  return `
+  <div class="tile">
+    <div class="tile-head">
+      <span class="tile-name">${mult}${esc(r.currency)} / RON</span>
+      <span class="chg ${cls}">${chgTxt}</span>
+    </div>
+    <div class="tile-val">${r.rate.toFixed(4)}</div>
+    ${sparkline(r.spark)}
+  </div>`;
+}
+
+function inflTile(s) {
+  const v = s.latest;
+  const chg = v != null && s.prev != null ? v - s.prev : null;
+  const chgTxt = chg == null ? "" : `${chg > 0 ? "+" : ""}${chg.toFixed(1)}pp`;
+  return `
+  <div class="tile">
+    <div class="tile-head">
+      <span class="tile-name">Inflation · ${esc(s.label)}</span>
+      <span class="chg muted">${chgTxt}</span>
+    </div>
+    <div class="tile-val">${v != null ? v.toFixed(1) + "%" : "—"}</div>
+    <div class="tile-sub">${esc(s.latestPeriod || "")}</div>
+    ${sparkline((s.spark || []).map((p) => p.value))}
+  </div>`;
+}
+
+function renderMacro(doc) {
+  const el = document.getElementById("macro");
+  if (!el) return;
+  const tiles = [];
+  if (doc.fx && doc.fx.rates) tiles.push(...doc.fx.rates.map(fxTile));
+  if (doc.inflation && doc.inflation.series) tiles.push(...doc.inflation.series.map(inflTile));
+  el.innerHTML = tiles.length ? `<div class="tiles">${tiles.join("")}</div>` : "";
+}
+
+async function loadMacro() {
+  try {
+    const res = await fetch("/api/macro", { headers: { accept: "application/json" } });
+    renderMacro(await res.json());
+  } catch (e) {
+    /* macro is non-critical — leave the panel empty on failure */
+  }
+}
+
 for (const el of [els.search, els.programme, els.status, els.deadline]) {
   el.addEventListener("input", applyFilters);
 }
 load();
+loadMacro();
