@@ -34,6 +34,12 @@ function esc(s) {
   );
 }
 
+// Only allow http(s) links — blocks javascript:/data: schemes that could ride in
+// on a malicious RSS item (defense-in-depth beyond the CSP).
+function safeHref(url) {
+  return /^https?:\/\//i.test(String(url || "")) ? String(url) : "#";
+}
+
 function cardHtml(c) {
   const dl = daysLeft(c.deadline);
   let urgency = "";
@@ -44,7 +50,7 @@ function cardHtml(c) {
   }
   const sClass =
     c.status === "open" ? "s-open" : c.status === "forthcoming" ? "s-fc" : "s-other";
-  const href = c.url || "#";
+  const href = safeHref(c.url);
   return `
   <a class="card ${urgency}" href="${esc(href)}" target="_blank" rel="noopener noreferrer">
     <div class="card-main">
@@ -302,7 +308,7 @@ function newsCard(it) {
     .map(esc)
     .join(" · ");
   return `
-  <a class="ncard u-${sc}" href="${esc(it.link)}" target="_blank" rel="noopener noreferrer">
+  <a class="ncard u-${sc}" href="${esc(safeHref(it.link))}" target="_blank" rel="noopener noreferrer">
     <div class="ncard-top">
       <span class="nsource">${esc(it.source)}</span>
       <span class="nscore s-${sc}">${it.score}</span>
