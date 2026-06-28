@@ -1,65 +1,181 @@
 :root {
   --bg: #0b0e14;
   --panel: #131823;
+  --panel-2: #0f141d;
   --border: #1f2733;
+  --border-2: #2a3543;
   --text: #e6edf3;
   --muted: #7d8794;
+  --muted-2: #586170;
+  --accent: #58a6ff;
   --ok: #2ea043;
-  --pending: #d29922;
-  --err: #f85149;
+  --warm: #d29922;
+  --hot: #f85149;
 }
 
 * { box-sizing: border-box; }
-html, body { margin: 0; height: 100%; }
-
+html, body { margin: 0; }
 body {
-  background: radial-gradient(1200px 600px at 50% -10%, #11161f, var(--bg));
+  background: radial-gradient(1200px 700px at 50% -15%, #11161f, var(--bg)) fixed;
   color: var(--text);
-  font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  display: grid;
-  place-items: center;
+  font: 14px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  min-height: 100vh;
 }
 
-main { width: min(560px, 92vw); padding: 2rem; }
-
-header h1 {
-  margin: 0;
-  font-size: 2.4rem;
-  letter-spacing: -0.02em;
-}
-
-.tagline { color: var(--muted); margin: 0.25rem 0 1.75rem; }
-
-.status-card {
+/* ---- top bar ---- */
+.topbar {
   display: flex;
-  gap: 0.9rem;
+  justify-content: space-between;
   align-items: center;
+  gap: 1rem;
+  padding: 1.1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  position: sticky;
+  top: 0;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  z-index: 5;
+}
+.brand { display: flex; align-items: center; gap: 0.8rem; }
+.logo { font-size: 1.6rem; color: var(--accent); }
+.brand h1 { margin: 0; font-size: 1.25rem; letter-spacing: -0.01em; }
+.sub { margin: 0; color: var(--muted); font-size: 0.8rem; }
+.meta { display: flex; flex-direction: column; align-items: flex-end; gap: 0.2rem; }
+.freshness { font-size: 0.78rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.freshness.stale { color: var(--warm); }
+.count { font-size: 0.78rem; color: var(--muted-2); }
+
+/* ---- filters ---- */
+.filters {
+  display: flex;
+  gap: 0.6rem;
+  padding: 1rem 1.5rem;
+  flex-wrap: wrap;
+  position: sticky;
+  top: 64px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(8px);
+  z-index: 4;
+}
+.f-search, .f-select {
+  background: var(--panel);
+  border: 1px solid var(--border-2);
+  color: var(--text);
+  border-radius: 9px;
+  padding: 0.55rem 0.75rem;
+  font: inherit;
+  outline: none;
+}
+.f-search { flex: 1 1 280px; min-width: 200px; }
+.f-search:focus, .f-select:focus { border-color: var(--accent); }
+.f-select { cursor: pointer; }
+
+/* ---- list ---- */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.5rem 1.5rem 3rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+.empty { color: var(--muted); padding: 3rem 0; text-align: center; }
+
+.card {
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 1rem;
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 1.1rem 1.25rem;
+  border-left: 3px solid var(--border-2);
+  border-radius: 11px;
+  padding: 0.9rem 1.1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.12s ease, transform 0.12s ease, background 0.12s ease;
 }
+.card:hover { background: #161c28; border-color: var(--border-2); transform: translateY(-1px); }
+.card.u-warm { border-left-color: var(--warm); }
+.card.u-hot { border-left-color: var(--hot); }
 
-.dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
+.card-main { min-width: 0; }
+.badges { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.45rem; }
+.badge {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.16rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border-2);
+  color: var(--muted);
+  white-space: nowrap;
+}
+.badge.s-open { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 45%, transparent); }
+.badge.s-fc { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.badge.prog { color: #c9b6ff; border-color: color-mix(in srgb, #c9b6ff 40%, transparent); }
+.badge.action { color: var(--muted); }
+
+.card h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.97rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+.ids {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.ids code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.74rem;
+  color: var(--muted);
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  padding: 0.05rem 0.4rem;
+  border-radius: 5px;
+}
+.ids .sep { color: var(--muted-2); }
+
+.card-deadline {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
   flex: none;
-  background: var(--pending);
-  box-shadow: 0 0 0 4px color-mix(in srgb, var(--pending) 22%, transparent);
+  text-align: right;
+  min-width: 96px;
 }
-.dot[data-state="ok"]  { background: var(--ok);  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ok) 22%, transparent); }
-.dot[data-state="err"] { background: var(--err); box-shadow: 0 0 0 4px color-mix(in srgb, var(--err) 22%, transparent); }
+.dl-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted-2);
+}
+.dl-val { font-size: 0.82rem; color: var(--text); font-variant-numeric: tabular-nums; }
+.card-deadline.u-warm .dl-val strong { color: var(--warm); }
+.card-deadline.u-hot .dl-val strong { color: var(--hot); }
 
-.status-label { font-weight: 600; }
-.status-meta {
-  color: var(--muted);
-  font-size: 0.85rem;
-  font-variant-numeric: tabular-nums;
+/* ---- footer ---- */
+.foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+  color: var(--muted-2);
+  font-size: 0.75rem;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-footer {
-  margin-top: 1.5rem;
-  color: var(--muted);
-  font-size: 0.8rem;
+@media (max-width: 560px) {
+  .card { flex-direction: column; }
+  .card-deadline { align-items: flex-start; text-align: left; flex-direction: row; gap: 0.4rem; }
 }

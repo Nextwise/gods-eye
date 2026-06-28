@@ -1,5 +1,6 @@
 # God's Eye — Netlify build configuration
 # Phase 1: static site in /public + Functions 2.0 in /netlify/functions
+# Slice 1: SEDIA fetch (scheduled + on-demand) -> Netlify Blobs -> /api/calls
 
 [build]
   publish   = "public"
@@ -13,5 +14,10 @@
 [functions]
   node_bundler = "esbuild"
 
-# Routing for /api/ping is declared in-code (config.path in ping.mts),
+# --- Cadences live here (config, not code) ---
+# Daily SEDIA refresh at 06:00 UTC. Calls don't change minute-to-minute.
+[functions."cron-sedia"]
+  schedule = "0 6 * * *"
+
+# Routing for /api/* is declared in-code (config.path in each .mts),
 # using Functions 2.0 native routing — no redirect rules needed.
