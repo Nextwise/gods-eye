@@ -1,0 +1,15 @@
+# dependencies
+node_modules/
+
+# netlify local state & build output
+.netlify/
+dist/
+
+# secrets — NEVER commit
+.env
+.env.*
+!.env.example
+
+# misc
+*.log
+.DS_Store

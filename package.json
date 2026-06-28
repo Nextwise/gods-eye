@@ -1,0 +1,19 @@
+{
+  "name": "gods-eye",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "God's Eye — cloud-native EU funding intelligence dashboard for ARVEST",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "netlify dev",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@netlify/functions": "^5.3.0",
+    "@types/node": "^26.0.1",
+    "typescript": "^6.0.3"
+  }
+}

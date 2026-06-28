@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>God's Eye — EU Funding Intelligence</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>God's Eye</h1>
+        <p class="tagline">EU funding intelligence &middot; ARVEST</p>
+      </header>
+
+      <section class="status-card" aria-live="polite">
+        <span class="dot" id="dot" data-state="pending"></span>
+        <div>
+          <div class="status-label" id="status">Checking pipe&hellip;</div>
+          <div class="status-meta" id="meta">contacting /api/ping</div>
+        </div>
+      </section>
+
+      <footer>
+        <span id="phase">Phase 1 &middot; pipe check</span>
+      </footer>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
